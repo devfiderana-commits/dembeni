@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: 'https://dembeni-back.onrender.com/api',
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 // Add token to request headers if it exists

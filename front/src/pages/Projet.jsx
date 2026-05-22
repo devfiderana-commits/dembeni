@@ -14,7 +14,7 @@ export default function Projet() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await api.get('/api/projects');
+        const response = await api.get('/projects');
         setProjects(response.data.projects || []);
       } catch (error) {
         console.error('Erreur lors du chargement des projets:', error);

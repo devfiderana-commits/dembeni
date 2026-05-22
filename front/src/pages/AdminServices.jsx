@@ -32,7 +32,7 @@ export default function AdminServices() {
   const loadServices = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/services');
+      const response = await api.get('/services');
       setServices(response.data.services || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de charger les services');
@@ -72,11 +72,11 @@ export default function AdminServices() {
 
     try {
       if (editingId) {
-        const response = await api.put(`/api/services/${editingId}`, form);
+        const response = await api.put(`/services/${editingId}`, form);
         setServices((prev) => prev.map((item) => (item._id === editingId ? response.data.service : item)));
         setStatus('Service mis à jour avec succès.');
       } else {
-        const response = await api.post('/api/services', form);
+        const response = await api.post('/services', form);
         setServices((prev) => [response.data.service, ...prev]);
         setStatus('Service ajouté avec succès.');
       }
@@ -107,7 +107,7 @@ export default function AdminServices() {
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce service ?')) return;
     try {
-      await api.delete(`/api/services/${id}`);
+      await api.delete(`/services/${id}`);
       setServices((prev) => prev.filter((item) => item._id !== id));
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de supprimer');

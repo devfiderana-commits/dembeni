@@ -16,7 +16,7 @@ export default function AdminMessages() {
   const loadMessages = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/messages');
+      const response = await api.get('/messages');
       setMessages(response.data.messages || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de charger les messages');
@@ -31,7 +31,7 @@ export default function AdminMessages() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await api.put(`/api/messages/${id}`, { status: newStatus });
+      await api.put(`/messages/${id}`, { status: newStatus });
       setMessages((prev) =>
         prev.map((msg) => (msg._id === id ? { ...msg, status: newStatus } : msg))
       );
@@ -48,7 +48,7 @@ export default function AdminMessages() {
 
     setSaving(true);
     try {
-      await api.put(`/api/messages/${selectedMessage._id}`, {
+      await api.put(`/messages/${selectedMessage._id}`, {
         status: 'replied',
         reply: replyText,
       });
@@ -74,7 +74,7 @@ export default function AdminMessages() {
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce message ?')) return;
     try {
-      await api.delete(`/api/messages/${id}`);
+      await api.delete(`/messages/${id}`);
       setMessages((prev) => prev.filter((msg) => msg._id !== id));
       setStatus('Message supprimé avec succès');
       setTimeout(() => setStatus(''), 3000);

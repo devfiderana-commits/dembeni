@@ -33,7 +33,7 @@ export default function Login() {
 
       setLoading(true);
       try {
-        await api.post('/api/auth/register', {
+        await api.post('/auth/register', {
           username,
           email,
           password,
@@ -59,7 +59,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await api.post('/api/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password,
       });

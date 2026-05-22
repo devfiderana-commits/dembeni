@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminLayout from '../components/AdminLayout';
 import api from '../api/axios';
@@ -6,153 +7,188 @@ import './Dashboard.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
+  const [summary, setSummary] = useState({
     totalUsers: 0,
     totalAdmins: 0,
     totalCitizens: 0,
-    recentUsers: [],
+    totalNews: 0,
+    totalServices: 0,
+    totalProjects: 0,
+    totalMessages: 0,
+    unreadMessages: 0,
+    recentMessages: [],
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchSummary = async () => {
       try {
-        const response = await api.get('/api/users');
-        const users = response.data.users || [];
+        const [usersRes, newsRes, servicesRes, projectsRes, messagesRes] = await Promise.all([
+          api.get('/users'),
+          api.get('/news'),
+          api.get('/services'),
+          api.get('/projects'),
+          api.get('/messages'),
+        ]);
 
-        const totalAdmins = users.filter(u => u.role === 'admin').length;
-        const totalCitizens = users.filter(u => u.role === 'user').length;
-        const recentUsers = users.slice(-5).reverse();
+        const users = usersRes.data.users || [];
+        const news = newsRes.data.news || [];
+        const services = servicesRes.data.services || [];
+        const projects = projectsRes.data.projects || [];
+        const messages = messagesRes.data.messages || [];
 
-        setStats({
+        const totalAdmins = users.filter((u) => u.role === 'admin').length;
+        const totalCitizens = users.filter((u) => u.role === 'user').length;
+        const unreadMessages = messages.filter((m) => m.status === 'unread').length;
+        const recentMessages = messages.slice(0, 5);
+
+        setSummary({
           totalUsers: users.length,
           totalAdmins,
           totalCitizens,
-          recentUsers,
+          totalNews: news.length,
+          totalServices: services.length,
+          totalProjects: projects.length,
+          totalMessages: messages.length,
+          unreadMessages,
+          recentMessages,
         });
       } catch (err) {
-        console.error('Error fetching stats:', err);
+        console.error('Error fetching dashboard data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchSummary();
   }, []);
 
   return (
     <AdminLayout>
       <div className="dashboard">
-        {/* Stats Cards */}
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon users-icon">
-              <i className="fas fa-users"></i>
-            </div>
-            <div className="stat-content">
-              <p className="stat-label">Utilisateurs totaux</p>
-              <h3 className="stat-value">{stats.totalUsers}</h3>
-            </div>
+        <div className="dashboard-header">
+          <div>
+            <p className="dashboard-tag">Tableau de bord global</p>
+            <h1>Résumé de gestion</h1>
+            <p className="dashboard-description">
+              Suivez les utilisateurs, actualités, services, projets et messages depuis une seule vue.
+            </p>
           </div>
-
-          <div className="stat-card">
-            <div className="stat-icon admins-icon">
-              <i className="fas fa-crown"></i>
-            </div>
-            <div className="stat-content">
-              <p className="stat-label">Administrateurs</p>
-              <h3 className="stat-value">{stats.totalAdmins}</h3>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon citizens-icon">
-              <i className="fas fa-user-circle"></i>
-            </div>
-            <div className="stat-content">
-              <p className="stat-label">Citoyens</p>
-              <h3 className="stat-value">{stats.totalCitizens}</h3>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon connected-icon">
-              <i className="fas fa-user-check"></i>
-            </div>
-            <div className="stat-content">
-              <p className="stat-label">Connecté</p>
-              <h3 className="stat-value">{user?.username || 'Admin'}</h3>
-            </div>
+          <div className="dashboard-meta">
+            <span>Connecté en tant que <strong>{user?.username || 'Admin'}</strong></span>
+            <span>{new Date().toLocaleDateString('fr-FR')}</span>
           </div>
         </div>
 
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-card">
-            <div className="welcome-header">
-              <h2>👋 Bienvenue, {user?.username}!</h2>
-              <p>Gérez votre plateforme depuis ce tableau de bord</p>
-            </div>
-            <div className="welcome-stats">
-              <div className="welcome-stat">
-                <span className="stat-number">{stats.totalUsers}</span>
-                <span className="stat-text">Utilisateurs inscrits</span>
-              </div>
-              <div className="welcome-stat">
-                <span className="stat-number">{Math.round((stats.totalAdmins / Math.max(stats.totalUsers, 1)) * 100)}%</span>
-                <span className="stat-text">Administrateurs</span>
-              </div>
-            </div>
+        <div className="overview-grid">
+          <div className="overview-card">
+            <p>Total utilisateurs</p>
+            <h2>{summary.totalUsers}</h2>
+          </div>
+          <div className="overview-card">
+            <p>Actualités</p>
+            <h2>{summary.totalNews}</h2>
+          </div>
+          <div className="overview-card">
+            <p>Services</p>
+            <h2>{summary.totalServices}</h2>
+          </div>
+          <div className="overview-card">
+            <p>Projets</p>
+            <h2>{summary.totalProjects}</h2>
+          </div>
+          <div className="overview-card">
+            <p>Messages reçus</p>
+            <h2>{summary.totalMessages}</h2>
+          </div>
+          <div className="overview-card unread-card">
+            <p>Messages non lus</p>
+            <h2>{summary.unreadMessages}</h2>
           </div>
         </div>
 
-        {/* Recent Users */}
-        {!loading && stats.recentUsers.length > 0 && (
-          <div className="recent-section">
-            <h3 className="section-title">📝 Derniers utilisateurs inscrits</h3>
-            <div className="recent-users-list">
-              {stats.recentUsers.map((user) => (
-                <div key={user._id} className="recent-user-item">
-                  <div className="user-avatar">
-                    <i className="fas fa-user-circle"></i>
-                  </div>
-                  <div className="user-details">
-                    <p className="user-name">{user.username}</p>
-                    <p className="user-email">{user.email}</p>
-                  </div>
-                  <div className="user-role">
-                    <span className={`role-badge ${user.role}`}>
-                      {user.role === 'admin' ? '👑 Admin' : '👤 Citoyen'}
-                    </span>
-                  </div>
-                  <div className="user-date">
-                    {new Date(user.createdAt).toLocaleDateString('fr-FR')}
-                  </div>
-                </div>
-              ))}
+        <div className="summary-sections">
+          <section className="summary-section">
+            <div className="section-header">
+              <h2>Statistiques principales</h2>
+              <p>Indicateurs clés de la plateforme</p>
             </div>
-          </div>
-        )}
+            <div className="summary-grid">
+              <div className="summary-item">
+                <span>Administrateurs</span>
+                <strong>{summary.totalAdmins}</strong>
+              </div>
+              <div className="summary-item">
+                <span>Citoyens</span>
+                <strong>{summary.totalCitizens}</strong>
+              </div>
+              <div className="summary-item">
+                <span>Projets en cours</span>
+                <strong>{summary.totalProjects}</strong>
+              </div>
+              <div className="summary-item">
+                <span>Services actifs</span>
+                <strong>{summary.totalServices}</strong>
+              </div>
+            </div>
+          </section>
 
-        {/* Quick Actions */}
+          <section className="summary-section">
+            <div className="section-header">
+              <h2>Derniers messages</h2>
+              <p>Les 5 messages les plus récents envoyés par les utilisateurs</p>
+            </div>
+            <div className="messages-list">
+              {loading ? (
+                <p>Chargement des messages...</p>
+              ) : summary.recentMessages.length === 0 ? (
+                <p>Aucun message récent.</p>
+              ) : (
+                summary.recentMessages.map((message) => (
+                  <div key={message._id} className="message-card">
+                    <div className="message-card-left">
+                      <p className="message-subject">{message.subject}</p>
+                      <p className="message-author">{message.name} • {message.email}</p>
+                    </div>
+                    <div className="message-card-right">
+                      <span className={`message-status ${message.status}`}>{message.status}</span>
+                      <span className="message-date">{new Date(message.createdAt).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+
         <div className="quick-actions">
           <h3 className="section-title">⚡ Actions rapides</h3>
           <div className="actions-grid">
-            <a href="/admin" className="action-card">
-              <i className="fas fa-list"></i>
-              <h4>Gérer les utilisateurs</h4>
-              <p>Voir et gérer tous les utilisateurs</p>
-            </a>
-            <a href="/" className="action-card">
-              <i className="fas fa-home"></i>
-              <h4>Retour à l'accueil</h4>
-              <p>Voir la page publique</p>
-            </a>
-            <a href="#" className="action-card">
+            <Link to="/admin/users" className="action-card">
+              <i className="fas fa-users"></i>
+              <h4>Voir les utilisateurs</h4>
+              <p>Accéder au gestionnaire de comptes</p>
+            </Link>
+            <Link to="/admin" className="action-card">
+              <i className="fas fa-newspaper"></i>
+              <h4>Gérer les actualités</h4>
+              <p>Créer ou modifier les publications</p>
+            </Link>
+            <Link to="/admin/services" className="action-card">
               <i className="fas fa-cog"></i>
-              <h4>Paramètres</h4>
-              <p>Configurer votre profil admin</p>
-            </a>
+              <h4>Gérer les services</h4>
+              <p>Mettre à jour les services publics</p>
+            </Link>
+            <Link to="/admin/projets" className="action-card">
+              <i className="fas fa-project-diagram"></i>
+              <h4>Gérer les projets</h4>
+              <p>Suivre les initiatives de la commune</p>
+            </Link>
+            <Link to="/admin/messages" className="action-card">
+              <i className="fas fa-envelope"></i>
+              <h4>Voir les messages</h4>
+              <p>Répondre aux demandes citoyennes</p>
+            </Link>
           </div>
         </div>
       </div>

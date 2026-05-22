@@ -69,7 +69,7 @@ export default function Services() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await api.get('/api/services');
+        const response = await api.get('/services');
         const fetchedServices = response.data.services || [];
         setServices(fetchedServices.length ? fetchedServices : defaultServices);
       } catch (err) {

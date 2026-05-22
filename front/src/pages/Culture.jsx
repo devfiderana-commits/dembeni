@@ -1,164 +1,99 @@
 import { Link } from 'react-router-dom';
 import './Culture.css';
 
+const cultureCases = [
+  {
+    id: 1,
+    category: 'Patrimoine',
+    title: 'Architecture Traditionnelle',
+    badgeDate: 'Depuis toujours',
+    badgeLabel: 'Patrimoine',
+    brand: 'Vestiges & Maisons',
+    points: [
+      'Maisons traditionnelles en bois et pisé.',
+      'Façades colorées et motifs historiques uniques.',
+      'Techniques de construction ancestrales préservées.',
+    ],
+    image: 'https://images.archiliste.fr/medium/projects/lab-reunion/technopole-de-dembeni/pers-ext.jpg',
+  },
+  {
+    id: 2,
+    category: 'Traditions',
+    title: 'Traditions Locales',
+    badgeDate: '15 Juin 2026',
+    badgeLabel: 'Cérémonies',
+    brand: 'Fêtes & Danses',
+    points: [
+      'Fêtes populaires et cérémonies saisonnières.',
+      'Musique, percussion et danses traditionnelles.',
+      'Transmissions orales et savoir-faire des anciens.',
+    ],
+    image: 'https://www.cioff.fr/wp-content/uploads/2024/01/danse-folklorique-en-France-1024x585.jpg',
+  },
+  {
+    id: 3,
+    category: 'Artisanat',
+    title: 'Arts et Artisanat',
+    badgeDate: 'Permanent',
+    badgeLabel: 'Savoir-faire',
+    brand: 'Créations Locales',
+    points: [
+      'Vannerie, poterie et tissage authentiques.',
+      'Objets décoratifs inspirés du territoire.',
+      'Artisans locaux engagés dans la préservation culturelle.',
+    ],
+    image: 'data:image/jpeg;base64,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',
+  },
+];
+
 export default function Culture() {
-  const heritageItems = [
-    {
-      id: 1,
-      title: 'Architecture Traditionnelle',
-      description: 'Découvrez l\'architecture unique de Dembéni avec ses maisons traditionnelles et bâtiments historiques.',
-      icon: 'fas fa-gopuram',
-      image: 'https://images.unsplash.com/photo-1577720600787-32a5a4a172db?auto=format&fit=crop&q=60&w=400',
-    },
-    {
-      id: 2,
-      title: 'Traditions Locales',
-      description: 'Immergez-vous dans les traditions culturelles, fêtes et cérémonies de notre commune.',
-      icon: 'fas fa-drum',
-      image: 'https://images.unsplash.com/photo-1533356122544-f006fcf1e7ca?auto=format&fit=crop&q=60&w=400',
-    },
-    {
-      id: 3,
-      title: 'Arts et Artisanat',
-      description: 'Explorez le savoir-faire local, les métiers traditionnels et les créations artisanales.',
-      icon: 'fas fa-palette',
-      image: 'https://images.unsplash.com/photo-1578500494198-246f612d03b3?auto=format&fit=crop&q=60&w=400',
-    },
-    {
-      id: 4,
-      title: 'Gastronomie Locale',
-      description: 'Savourez les saveurs authentiques de la cuisine traditionnelle de Mayotte.',
-      icon: 'fas fa-utensils',
-      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=60&w=400',
-    },
-  ];
-
-  const events = [
-    {
-      id: 1,
-      title: 'Festival de la Culture',
-      date: '15 Juin 2026',
-      location: 'Place du Village',
-      description: 'Célébration annuelle des traditions locales avec musique, danse et gastronomie.',
-    },
-    {
-      id: 2,
-      title: 'Exposition d\'Art Local',
-      date: '22 Juin 2026',
-      location: 'Mairie de Dembéni',
-      description: 'Exposition mettant en avant les œuvres des artistes locaux.',
-    },
-    {
-      id: 3,
-      title: 'Visite Guidée du Patrimoine',
-      date: 'Tous les samedis',
-      location: 'Points de rendez-vous',
-      description: 'Découvrez l\'histoire et l\'architecture de Dembéni avec nos guides.',
-    },
-  ];
-
   return (
-    <>
-      {/* HERO SECTION */}
-      <section className="hero culture-hero">
-        <div className="hero-bg"></div>
-        <div className="hero-inner">
-          <div className="hero-content">
-            <div className="hero-tag">
-              <i className="fas fa-palette"></i> Richesse Culturelle
-            </div>
-            <h1>
-              Culture et <strong>Patrimoine</strong> de Dembéni
-            </h1>
-            <p>
-              Explorez la richesse historique, les traditions et la diversité culturelle de notre belle commune.
-            </p>
-            <div className="hero-actions">
-              <a href="#heritage" className="btn-hero-primary">
-                <i className="fas fa-arrow-right"></i> Découvrir le patrimoine
-              </a>
-              <a href="#events" className="btn-hero-ghost">
-                <i className="fas fa-calendar"></i> Événements à venir
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* HERITAGE SECTION */}
-      <section className="section" id="heritage">
-        <div className="section-header center">
-          <span className="section-tag"><i className="fas fa-book"></i> Patrimoine</span>
-          <h2 className="section-title">Notre Héritage Culturel</h2>
-          <div className="divider"></div>
-          <p className="section-subtitle mt-2">
-            Découvrez les éléments clés qui définissent la culture de Dembéni.
-          </p>
+    <main className="culture-page">
+      <div className="case-studies-container">
+        <div className="section-title">
+          <span className="subtitle">Culture & Patrimoine</span>
+          <h1>Dembéni : Mémoire, Traditions et Arts</h1>
         </div>
 
-        <div className="services-grid" style={{ marginTop: '2rem' }}>
-          {heritageItems.map((item) => (
-            <div key={item.id} className="service-card-new">
-              <div className="scn-img">
-                <img src={item.image} alt={item.title} />
-              </div>
-              <div className="scn-body">
-                <div className="scn-icon">
-                  <i className={item.icon}></i>
+        {cultureCases.map((item, index) => (
+          <article
+            key={item.id}
+            className={`case-study-row ${index % 2 === 1 ? 'reverse' : ''}`}
+            aria-label={item.title}
+          >
+            <div className="case-study-visual">
+              <div
+                className={`lime-card gradient-${(index % 3) + 1}`}
+                tabIndex="0"
+                role="img"
+                aria-label={item.title}
+              >
+                <div className="lime-card-image">
+                  <img src={item.image} alt={item.title} />
                 </div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
+                <div className="mockup-badge stats-badge">
+                  <span className="percentage">{item.badgeDate}</span>
+                  <span className="label">{item.badgeLabel}</span>
+                </div>
+                <div className="mockup-badge brand-badge">{item.brand}</div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* EVENTS SECTION */}
-      <section className="section" id="events">
-        <div className="section-header center">
-          <span className="section-tag"><i className="fas fa-calendar-alt"></i> Événements</span>
-          <h2 className="section-title">Événements Culturels</h2>
-          <div className="divider"></div>
-          <p className="section-subtitle mt-2">
-            Participez aux événements et manifestations culturelles organisés par la commune.
-          </p>
-        </div>
-
-        <div className="events-list" style={{ marginTop: '2rem' }}>
-          {events.map((event) => (
-            <div key={event.id} className="event-card">
-              <div className="event-date">
-                <i className="fas fa-calendar"></i>
-                <span>{event.date}</span>
-              </div>
-              <div className="event-content">
-                <h3>{event.title}</h3>
-                <p className="event-location">
-                  <i className="fas fa-map-marker-alt"></i> {event.location}
-                </p>
-                <p className="event-description">{event.description}</p>
-              </div>
-              <Link to="/contact" className="btn-event">
-                En savoir plus
+            <div className="case-study-content">
+              <span className="category-tag">{item.category}</span>
+              <h2>{item.title}</h2>
+              <ol className="points-list">
+                {item.points.map((point, pointIndex) => (
+                  <li key={pointIndex}>{point}</li>
+                ))}
+              </ol>
+              <Link to={`/culture/${item.id}`} className="btn-primary" aria-label={`En savoir plus sur ${item.title}`}>
+                En savoir plus <span className="arrow" aria-hidden="true">→</span>
               </Link>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA SECTION */}
-      <section className="section section-cta">
-        <div className="section-header center">
-          <h2 className="section-title">Participez à la Vie Culturelle</h2>
-          <p className="section-subtitle">
-            Vous avez un événement culturel à proposer ou souhaitez nous aider ?
-          </p>
-          <Link to="/contact" className="btn-hero-primary">
-            <i className="fas fa-envelope"></i> Nous Contacter
-          </Link>
-        </div>
-      </section>
-    </>
+          </article>
+        ))}
+      </div>
+    </main>
   );
 }

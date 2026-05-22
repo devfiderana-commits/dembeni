@@ -27,7 +27,7 @@ export default function Contact() {
     setStatus('');
 
     try {
-      await api.post('/api/messages', {
+      await api.post('/messages', {
         name: formData.nom,
         email: formData.email,
         subject: formData.subject,

@@ -25,7 +25,7 @@ export default function AdminNews() {
   const loadNews = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/news');
+      const response = await api.get('/news');
       setNews(response.data.news || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de charger les actualités');
@@ -87,11 +87,11 @@ export default function AdminNews() {
 
     try {
       if (editingId) {
-        const response = await api.put(`/api/news/${editingId}`, payload);
+        const response = await api.put(`/news/${editingId}`, payload);
         setNews((prev) => prev.map((item) => (item._id === editingId ? response.data.news : item)));
         setStatus('Actualité mise à jour avec succès.');
       } else {
-        const response = await api.post('/api/news', payload);
+        const response = await api.post('/news', payload);
         setNews((prev) => [response.data.news, ...prev]);
         setStatus('Actualité ajoutée avec succès.');
       }
@@ -122,7 +122,7 @@ export default function AdminNews() {
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette actualité ?')) return;
     try {
-      await api.delete(`/api/news/${id}`);
+      await api.delete(`/news/${id}`);
       setNews((prev) => prev.filter((item) => item._id !== id));
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de supprimer');

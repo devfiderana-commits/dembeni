@@ -5,6 +5,9 @@ import './Admin.css';
 
 export default function AdminProjets() {
   const [projects, setProjects] = useState([]);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('Tous');
+  const [filterCategory, setFilterCategory] = useState('Tous');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -28,10 +31,31 @@ export default function AdminProjets() {
   const categories = ['Urbanisme', 'Éducation', 'Environnement', 'Énergie', 'Culture', 'Santé', 'Sport', 'Social'];
   const statuses = ['Planification', 'En cours', 'Terminé', 'Suspendu'];
 
+  const filteredProjects = projects.filter((project) => {
+    const query = search.toLowerCase().trim();
+    const matchesSearch =
+      project.title.toLowerCase().includes(query) ||
+      project.description.toLowerCase().includes(query) ||
+      project.location?.toLowerCase().includes(query) ||
+      project.responsible?.toLowerCase().includes(query);
+
+    const matchesStatus = filterStatus === 'Tous' || project.status === filterStatus;
+    const matchesCategory = filterCategory === 'Tous' || project.category === filterCategory;
+
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  const totalInProgress = projects.filter((p) => p.status === 'En cours').length;
+  const totalCompleted = projects.filter((p) => p.status === 'Terminé').length;
+  const totalSuspended = projects.filter((p) => p.status === 'Suspendu').length;
+  const averageCompletion = projects.length
+    ? Math.round(projects.reduce((sum, project) => sum + (project.completion || 0), 0) / projects.length)
+    : 0;
+
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/projects');
+      const response = await api.get('/projects');
       setProjects(response.data.projects || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Impossible de charger les projets');
@@ -76,11 +100,11 @@ export default function AdminProjets() {
 
     try {
       if (editingId) {
-        const response = await api.put(`/api/projects/${editingId}`, form);
+        const response = await api.put(`/projects/${editingId}`, form);
         setProjects((prev) => prev.map((item) => (item._id === editingId ? response.data.project : item)));
         setStatus('Projet mis à jour avec succès.');
       } else {
-        const response = await api.post('/api/projects', form);
+        const response = await api.post('/projects', form);
         setProjects((prev) => [response.data.project, ...prev]);
         setStatus('Projet ajouté avec succès.');
       }
@@ -133,6 +157,14 @@ export default function AdminProjets() {
     }
   };
 
+  const getStatusClass = (status) => {
+    return status
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '');
+  };
+
   return (
     <AdminLayout>
       <div className="admin-box">
@@ -156,12 +188,41 @@ export default function AdminProjets() {
           </div>
           <div className="summary-item">
             <span>En cours</span>
-            <strong>{projects.filter((p) => p.status === 'En cours').length}</strong>
+            <strong>{totalInProgress}</strong>
           </div>
           <div className="summary-item">
             <span>Terminés</span>
-            <strong>{projects.filter((p) => p.status === 'Terminé').length}</strong>
+            <strong>{totalCompleted}</strong>
           </div>
+          <div className="summary-item">
+            <span>Suspendus</span>
+            <strong>{totalSuspended}</strong>
+          </div>
+          <div className="summary-item">
+            <span>Progression moyenne</span>
+            <strong>{averageCompletion}%</strong>
+          </div>
+        </div>
+
+        <div className="admin-search-grid">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un projet, lieu ou responsable..."
+          />
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option>Tous</option>
+            {statuses.map((statusOption) => (
+              <option key={statusOption} value={statusOption}>{statusOption}</option>
+            ))}
+          </select>
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+            <option>Tous</option>
+            {categories.map((categoryOption) => (
+              <option key={categoryOption} value={categoryOption}>{categoryOption}</option>
+            ))}
+          </select>
         </div>
 
         {status && (
@@ -266,12 +327,14 @@ export default function AdminProjets() {
           <p>Chargement des projets...</p>
         ) : projects.length === 0 ? (
           <p>Aucun projet disponible.</p>
+        ) : filteredProjects.length === 0 ? (
+          <p>Aucun projet ne correspond aux filtres sélectionnés.</p>
         ) : (
           <div className="users-table-wrapper">
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>Titre</th>
+                  <th>Projet</th>
                   <th>Catégorie</th>
                   <th>Statut</th>
                   <th>Avancement</th>
@@ -279,46 +342,32 @@ export default function AdminProjets() {
                 </tr>
               </thead>
               <tbody>
-                {projects.map((item) => (
+                {filteredProjects.map((item) => (
                   <tr key={item._id}>
                     <td>
                       <div className="item-title-cell">
                         <div>
                           <strong>{item.title}</strong>
                           <p>{item.description}</p>
+                          <p className="project-meta">
+                            {item.location && <span>📍 {item.location}</span>}
+                            {item.responsible && <span>👤 {item.responsible}</span>}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td>{item.category}</td>
                     <td>
-                      <span style={{
-                        background: getStatusColor(item.status) + '20',
-                        color: getStatusColor(item.status),
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '50px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                      }}>
+                      <span className={`status-badge status-${getStatusClass(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{
-                          width: '60px',
-                          height: '8px',
-                          background: '#e5e7eb',
-                          borderRadius: '4px',
-                          overflow: 'hidden',
-                        }}>
-                          <div style={{
-                            width: `${item.completion}%`,
-                            height: '100%',
-                            background: getStatusColor(item.status),
-                            borderRadius: '4px',
-                          }}></div>
+                      <div className="progress-cell">
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: `${item.completion}%`, background: getStatusColor(item.status) }} />
                         </div>
-                        <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{item.completion}%</span>
+                        <span>{item.completion || 0}%</span>
                       </div>
                     </td>
                     <td>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import NewsSection from './NewsSection';
+import EventsSection from './EventsSection';
 import './Actualites.css';
 
 const defaultNews = [
@@ -33,6 +35,36 @@ const defaultNews = [
   },
 ];
 
+const defaultEvents = [
+  {
+    _id: 'event-1',
+    title: 'Fête de la Culture Locale',
+    excerpt: 'Musique, artisanat et cuisine traditionnelle pendant tout un weekend.',
+    location: 'Parc Municipal de Dembéni',
+    date: '2026-06-12',
+    time: '14h00 - 20h00',
+    image: 'https://images.unsplash.com/photo-1515169067865-5387ec356754?auto=format&fit=crop&q=60&w=400',
+  },
+  {
+    _id: 'event-2',
+    title: 'Forum Jeunesse et Emploi',
+    excerpt: 'Rencontrez des conseillers emploi et découvrez les formations locales.',
+    location: 'Maison des Jeunes',
+    date: '2026-06-20',
+    time: '09h00 - 15h00',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=60&w=400',
+  },
+  {
+    _id: 'event-3',
+    title: 'Nettoyage Collectif du Littoral',
+    excerpt: 'Participez à la préservation de notre environnement côtier.',
+    location: 'Plage de Dembéni',
+    date: '2026-06-28',
+    time: '08h00 - 12h00',
+    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&q=60&w=400',
+  },
+];
+
 export default function Actualites() {
   const [news, setNews] = useState(defaultNews);
   const [loading, setLoading] = useState(true);
@@ -41,10 +73,10 @@ export default function Actualites() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await api.get('/api/news');
+        const response = await api.get('/news');
         const fetchedNews = response.data.news || [];
         setNews(fetchedNews.length ? fetchedNews : defaultNews);
-      } catch (err) {
+      } catch {
         setError('Impossible de charger les actualités. Affichage du contenu par défaut.');
         setNews(defaultNews);
       } finally {
@@ -85,6 +117,15 @@ export default function Actualites() {
         </div>
       </section>
 
+      {loading && (
+        <section className="section section-loading">
+          <div className="section-header center">
+            <h2 className="section-title">Chargement des actualités...</h2>
+            <div className="divider"></div>
+          </div>
+        </section>
+      )}
+
       {/* NEWS SECTION */}
       <section className="section" id="news">
         <div className="section-header center">
@@ -95,6 +136,7 @@ export default function Actualites() {
             Restez à jour avec les derniers développements de Dembéni.
           </p>
         </div>
+        {error && <div className="alert-message">{error}</div>}
 
         {/* FILTER BUTTONS */}
         <div className="categories-filter">
@@ -120,13 +162,22 @@ export default function Actualites() {
                 </div>
                 <h3>{article.title}</h3>
                 <p>{article.excerpt}</p>
-                <Link
-                  to="/contact"
+                <button
+                  type="button"
                   className="btn-read-more"
                   aria-label={`Lire l'article : ${article.title}`}
                 >
-                  Lire plus <i className="fas fa-arrow-right" aria-hidden="true"></i>
-                </Link>
+                  Voir plus <i className="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div className="notch-container">
+                <button
+                  type="button"
+                  className="action-btn"
+                  aria-label={`Voir l'article ${article.title}`}
+                >
+                  <i className="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
               </div>
             </article>
           ))}
@@ -139,6 +190,12 @@ export default function Actualites() {
           </button>
         </div>
       </section>
+
+      {/* EVENTS SECTION COMPONENT */}
+      <EventsSection defaultEvents={defaultEvents} />
+
+      {/* NEWS SECTION COMPONENT */}
+      <NewsSection />
 
       {/* NEWSLETTER SECTION */}
       <section className="section section-newsletter">

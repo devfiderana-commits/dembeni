@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import AdminRoute from './components/AdminRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -11,6 +12,7 @@ import Contact from './pages/Contact';
 import Demarches from './pages/Demarches';
 import Actualites from './pages/Actualites';
 import Culture from './pages/Culture';
+import CultureDetail from './pages/CultureDetail';
 import Projet from './pages/Projet';
 import Solidarite from './pages/Solidarite';
 import Admin from './pages/Admin';
@@ -33,6 +35,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/actualites" element={<Actualites />} />
         <Route path="/culture" element={<Culture />} />
+        <Route path="/culture/:id" element={<CultureDetail />} />
         <Route path="/projet" element={<Projet />} />
         <Route path="/solidarite" element={<Solidarite />} />
         <Route path="/services" element={<Services />} />
@@ -94,6 +97,7 @@ function AppContent() {
           }
         />
       </Routes>
+      {!hideNavbar && <Footer />}
     </>
   );
 }
